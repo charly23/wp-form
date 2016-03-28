@@ -1,6 +1,6 @@
 <div id="register-form" class="widecolumn">
 	<?php if ( $attributes['show_title'] ) : ?>
-		<h3><?php _e( 'Register', 'personalize-login' ); ?></h3>
+		<h3><?php _e( 'Register', 'wp-forms' ); ?></h3>
 	<?php endif; ?>
 
 	<?php if ( count( $attributes['errors'] ) > 0 ) : ?>
@@ -13,22 +13,22 @@
 
 	<form id="signupform" action="<?php echo wp_registration_url(); ?>" method="post">
 		<p class="form-row">
-			<label for="email"><?php _e( 'Email', 'personalize-login' ); ?> <strong>*</strong></label>
+			<label for="email"><?php _e( 'Email', 'wp-forms' ); ?> <strong>*</strong></label>
 			<input type="text" name="email" id="email">
 		</p>
 
 		<p class="form-row">
-			<label for="first_name"><?php _e( 'First name', 'personalize-login' ); ?></label>
+			<label for="first_name"><?php _e( 'First name', 'wp-forms' ); ?></label>
 			<input type="text" name="first_name" id="first-name">
 		</p>
 
 		<p class="form-row">
-			<label for="last_name"><?php _e( 'Last name', 'personalize-login' ); ?></label>
+			<label for="last_name"><?php _e( 'Last name', 'wp-forms' ); ?></label>
 			<input type="text" name="last_name" id="last-name">
 		</p>
 
 		<p class="form-row">
-			<?php _e( 'Note: Your password will be generated automatically and emailed to the address you specify above.', 'personalize-login' ); ?>
+			<?php _e( 'Note: Your password will be generated automatically and emailed to the address you specify above.', 'wp-forms' ); ?>
 		</p>
 
 		<?php if ( $attributes['recaptcha_site_key'] ) : ?>

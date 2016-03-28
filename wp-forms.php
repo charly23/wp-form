@@ -1,14 +1,16 @@
 <?php
 /**
- * Plugin Name:       Personalize Login
- * Description:       A plugin that replaces the WordPress login flow with a custom page.
+ * Plugin Name:       WP Forms
+ * Description:       A plugin that replaces the WordPress default forms flow with a custom page.
  * Version:           1.0.0
- * Author:            Jarkko Laine
+ * Author:            Charly Capillanes
  * License:           GPL-2.0+
- * Text Domain:       personalize-login
+ * Text Domain:       wp-forms
  */
 
-class Personalize_Login_Plugin {
+class WP_Forms {
+    
+    var $wp_forms = 'wp-forms';
 
 	/**
 	 * Initializes the plugin.
@@ -18,7 +20,7 @@ class Personalize_Login_Plugin {
 	 */
 	public function __construct() {
 
-		// Redirects
+		// redirects
 		add_action( 'login_form_login', array( $this, 'redirect_to_custom_login' ) );
 		add_filter( 'authenticate', array( $this, 'maybe_redirect_at_authenticate' ), 101, 3 );
 		add_filter( 'login_redirect', array( $this, 'redirect_after_login' ), 10, 3 );
@@ -35,19 +37,40 @@ class Personalize_Login_Plugin {
 		add_action( 'login_form_rp', array( $this, 'do_password_reset' ) );
 		add_action( 'login_form_resetpass', array( $this, 'do_password_reset' ) );
 
-		// Other customizations
+		// other customizations
 		add_filter( 'retrieve_password_message', array( $this, 'replace_retrieve_password_message' ), 10, 4 );
 
-		// Setup
+		// setup
 		add_action( 'wp_print_footer_scripts', array( $this, 'add_captcha_js_to_footer' ) );
 		add_filter( 'admin_init' , array( $this, 'register_settings_fields' ) );
 
-		// Shortcodes
+		// shortcodes
 		add_shortcode( 'custom-login-form', array( $this, 'render_login_form' ) );
 		add_shortcode( 'custom-register-form', array( $this, 'render_register_form' ) );
 		add_shortcode( 'custom-password-lost-form', array( $this, 'render_password_lost_form' ) );
 		add_shortcode( 'custom-password-reset-form', array( $this, 'render_password_reset_form' ) );
+        
+        // admin page
+        add_action( 'admin_menu', array( $this, 'admin_menu_page' ) );
+
 	}
+    
+    /**
+	 * wp-forms shortcodes documentation function
+	 *
+	 */
+    public function admin_menu_page () {
+
+         add_menu_page( __( 'WP Forms', 'wp_forms' ), 'WP Forms', 'manage_options', 'wp_forms', array( $this, 'wpforms_menu_page' ), plugins_url( 'wp-forms/form.png' ), 6 ); 
+    }
+    
+    /**
+	 * wp-forms shortcodes page callback
+	 *
+	 */
+    public function wpforms_menu_page () {
+         include_once __( 'docs.php' );
+    }
 
 	/**
 	 * Plugin activation hook.
@@ -58,23 +81,23 @@ class Personalize_Login_Plugin {
 		// Information needed for creating the plugin's pages
 		$page_definitions = array(
 			'member-login' => array(
-				'title' => __( 'Sign In', 'personalize-login' ),
+				'title' => __( 'Sign In', 'wp-forms' ),
 				'content' => '[custom-login-form]'
 			),
 			'member-account' => array(
-				'title' => __( 'Your Account', 'personalize-login' ),
+				'title' => __( 'Your Account', 'wp-forms' ),
 				'content' => '[account-info]'
 			),
 			'member-register' => array(
-				'title' => __( 'Register', 'personalize-login' ),
+				'title' => __( 'Register', 'wp-forms' ),
 				'content' => '[custom-register-form]'
 			),
 			'member-password-lost' => array(
-				'title' => __( 'Forgot Your Password?', 'personalize-login' ),
+				'title' => __( 'Forgot Your Password?', 'wp-forms' ),
 				'content' => '[custom-password-lost-form]'
 			),
 			'member-password-reset' => array(
-				'title' => __( 'Pick a New Password', 'personalize-login' ),
+				'title' => __( 'Pick a New Password', 'wp-forms' ),
 				'content' => '[custom-password-reset-form]'
 			)
 		);
@@ -271,7 +294,7 @@ class Personalize_Login_Plugin {
 		$attributes = shortcode_atts( $default_attributes, $attributes );
 
 		if ( is_user_logged_in() ) {
-			return __( 'You are already signed in.', 'personalize-login' );
+			return __( 'You are already signed in.', 'wp-forms' );
 		}
 
 		// Pass the redirect parameter to the WordPress login functionality: by default,
@@ -323,9 +346,9 @@ class Personalize_Login_Plugin {
 		$attributes = shortcode_atts( $default_attributes, $attributes );
 
 		if ( is_user_logged_in() ) {
-			return __( 'You are already signed in.', 'personalize-login' );
+			return __( 'You are already signed in.', 'wp-forms' );
 		} elseif ( ! get_option( 'users_can_register' ) ) {
-			return __( 'Registering new users is currently not allowed.', 'personalize-login' );
+			return __( 'Registering new users is currently not allowed.', 'wp-forms' );
 		} else {
 			// Retrieve possible errors from request parameters
 			$attributes['errors'] = array();
@@ -338,7 +361,7 @@ class Personalize_Login_Plugin {
 			}
 
 			// Retrieve recaptcha key
-			$attributes['recaptcha_site_key'] = get_option( 'personalize-login-recaptcha-site-key', null );
+			$attributes['recaptcha_site_key'] = get_option( 'wp-forms-recaptcha-site-key', null );
 
 			return $this->get_template_html( 'register_form', $attributes );
 		}
@@ -358,7 +381,7 @@ class Personalize_Login_Plugin {
 		$attributes = shortcode_atts( $default_attributes, $attributes );
 
 		if ( is_user_logged_in() ) {
-			return __( 'You are already signed in.', 'personalize-login' );
+			return __( 'You are already signed in.', 'wp-forms' );
 		} else {
 			// Retrieve possible errors from request parameters
 			$attributes['errors'] = array();
@@ -388,7 +411,7 @@ class Personalize_Login_Plugin {
 		$attributes = shortcode_atts( $default_attributes, $attributes );
 
 		if ( is_user_logged_in() ) {
-			return __( 'You are already signed in.', 'personalize-login' );
+			return __( 'You are already signed in.', 'wp-forms' );
 		} else {
 			if ( isset( $_REQUEST['login'] ) && isset( $_REQUEST['key'] ) ) {
 				$attributes['login'] = $_REQUEST['login'];
@@ -407,7 +430,7 @@ class Personalize_Login_Plugin {
 
 				return $this->get_template_html( 'password_reset_form', $attributes );
 			} else {
-				return __( 'Invalid password reset link.', 'personalize-login' );
+				return __( 'Invalid password reset link.', 'wp-forms' );
 			}
 		}
 	}
@@ -435,11 +458,11 @@ class Personalize_Login_Plugin {
 
 		ob_start();
 
-		do_action( 'personalize_login_before_' . $template_name );
+		do_action( 'wp-forms_before_' . $template_name );
 
 		require( 'templates/' . $template_name . '.php');
 
-		do_action( 'personalize_login_after_' . $template_name );
+		do_action( 'wp-forms_after_' . $template_name );
 
 		$html = ob_get_contents();
 		ob_end_clean();
@@ -589,12 +612,12 @@ class Personalize_Login_Plugin {
 	 */
 	public function replace_retrieve_password_message( $message, $key, $user_login, $user_data ) {
 		// Create new message
-		$msg  = __( 'Hello!', 'personalize-login' ) . "\r\n\r\n";
-		$msg .= sprintf( __( 'You asked us to reset your password for your account using the email address %s.', 'personalize-login' ), $user_login ) . "\r\n\r\n";
-		$msg .= __( "If this was a mistake, or you didn't ask for a password reset, just ignore this email and nothing will happen.", 'personalize-login' ) . "\r\n\r\n";
-		$msg .= __( 'To reset your password, visit the following address:', 'personalize-login' ) . "\r\n\r\n";
+		$msg  = __( 'Hello!', 'wp-forms' ) . "\r\n\r\n";
+		$msg .= sprintf( __( 'You asked us to reset your password for your account using the email address %s.', 'wp-forms' ), $user_login ) . "\r\n\r\n";
+		$msg .= __( "If this was a mistake, or you didn't ask for a password reset, just ignore this email and nothing will happen.", 'wp-forms' ) . "\r\n\r\n";
+		$msg .= __( 'To reset your password, visit the following address:', 'wp-forms' ) . "\r\n\r\n";
 		$msg .= site_url( "wp-login.php?action=rp&key=$key&login=" . rawurlencode( $user_login ), 'login' ) . "\r\n\r\n";
-		$msg .= __( 'Thanks!', 'personalize-login' ) . "\r\n";
+		$msg .= __( 'Thanks!', 'wp-forms' ) . "\r\n";
 
 		return $msg;
 	}
@@ -665,7 +688,7 @@ class Personalize_Login_Plugin {
 			'https://www.google.com/recaptcha/api/siteverify',
 			array(
 				'body' => array(
-					'secret' => get_option( 'personalize-login-recaptcha-secret-key' ),
+					'secret' => get_option( 'wp-forms-recaptcha-secret-key' ),
 					'response' => $captcha_response
 				)
 			)
@@ -711,64 +734,64 @@ class Personalize_Login_Plugin {
 			// Login errors
 
 			case 'empty_username':
-				return __( 'You do have an email address, right?', 'personalize-login' );
+				return __( 'You do have an email address, right?', 'wp-forms' );
 
 			case 'empty_password':
-				return __( 'You need to enter a password to login.', 'personalize-login' );
+				return __( 'You need to enter a password to login.', 'wp-forms' );
 
 			case 'invalid_username':
 				return __(
 					"We don't have any users with that email address. Maybe you used a different one when signing up?",
-					'personalize-login'
+					'wp-forms'
 				);
 
 			case 'incorrect_password':
 				$err = __(
 					"The password you entered wasn't quite right. <a href='%s'>Did you forget your password</a>?",
-					'personalize-login'
+					'wp-forms'
 				);
 				return sprintf( $err, wp_lostpassword_url() );
 
 			// Registration errors
 
 			case 'email':
-				return __( 'The email address you entered is not valid.', 'personalize-login' );
+				return __( 'The email address you entered is not valid.', 'wp-forms' );
 
 			case 'email_exists':
-				return __( 'An account exists with this email address.', 'personalize-login' );
+				return __( 'An account exists with this email address.', 'wp-forms' );
 
 			case 'closed':
-				return __( 'Registering new users is currently not allowed.', 'personalize-login' );
+				return __( 'Registering new users is currently not allowed.', 'wp-forms' );
 
 			case 'captcha':
-				return __( 'The Google reCAPTCHA check failed. Are you a robot?', 'personalize-login' );
+				return __( 'The Google reCAPTCHA check failed. Are you a robot?', 'wp-forms' );
 
 			// Lost password
 
 			case 'empty_username':
-				return __( 'You need to enter your email address to continue.', 'personalize-login' );
+				return __( 'You need to enter your email address to continue.', 'wp-forms' );
 
 			case 'invalid_email':
 			case 'invalidcombo':
-				return __( 'There are no users registered with this email address.', 'personalize-login' );
+				return __( 'There are no users registered with this email address.', 'wp-forms' );
 
 			// Reset password
 
 			case 'expiredkey':
 			case 'invalidkey':
-				return __( 'The password reset link you used is not valid anymore.', 'personalize-login' );
+				return __( 'The password reset link you used is not valid anymore.', 'wp-forms' );
 
 			case 'password_reset_mismatch':
-				return __( "The two passwords you entered don't match.", 'personalize-login' );
+				return __( "The two passwords you entered don't match.", 'wp-forms' );
 
 			case 'password_reset_empty':
-				return __( "Sorry, we don't accept empty passwords.", 'personalize-login' );
+				return __( "Sorry, we don't accept empty passwords.", 'wp-forms' );
 
 			default:
 				break;
 		}
 
-		return __( 'An unknown error occurred. Please try again later.', 'personalize-login' );
+		return __( 'An unknown error occurred. Please try again later.', 'wp-forms' );
 	}
 
 
@@ -781,38 +804,38 @@ class Personalize_Login_Plugin {
 	 */
 	public function register_settings_fields() {
 		// Create settings fields for the two keys used by reCAPTCHA
-		register_setting( 'general', 'personalize-login-recaptcha-site-key' );
-		register_setting( 'general', 'personalize-login-recaptcha-secret-key' );
+		register_setting( 'general', 'wp-forms-recaptcha-site-key' );
+		register_setting( 'general', 'wp-forms-recaptcha-secret-key' );
 
 		add_settings_field(
-			'personalize-login-recaptcha-site-key',
-			'<label for="personalize-login-recaptcha-site-key">' . __( 'reCAPTCHA site key' , 'personalize-login' ) . '</label>',
+			'wp-forms-recaptcha-site-key',
+			'<label for="wp-forms-recaptcha-site-key">' . __( 'reCAPTCHA site key' , 'wp-forms' ) . '</label>',
 			array( $this, 'render_recaptcha_site_key_field' ),
 			'general'
 		);
 
 		add_settings_field(
-			'personalize-login-recaptcha-secret-key',
-			'<label for="personalize-login-recaptcha-secret-key">' . __( 'reCAPTCHA secret key' , 'personalize-login' ) . '</label>',
+			'wp-forms-recaptcha-secret-key',
+			'<label for="wp-forms-recaptcha-secret-key">' . __( 'reCAPTCHA secret key' , 'wp-forms' ) . '</label>',
 			array( $this, 'render_recaptcha_secret_key_field' ),
 			'general'
 		);
 	}
 
 	public function render_recaptcha_site_key_field() {
-		$value = get_option( 'personalize-login-recaptcha-site-key', '' );
-		echo '<input type="text" id="personalize-login-recaptcha-site-key" name="personalize-login-recaptcha-site-key" value="' . esc_attr( $value ) . '" />';
+		$value = get_option( 'wp-forms-recaptcha-site-key', '' );
+		echo '<input type="text" id="wp-forms-recaptcha-site-key" name="wp-forms-recaptcha-site-key" value="' . esc_attr( $value ) . '" />';
 	}
 
 	public function render_recaptcha_secret_key_field() {
-		$value = get_option( 'personalize-login-recaptcha-secret-key', '' );
-		echo '<input type="text" id="personalize-login-recaptcha-secret-key" name="personalize-login-recaptcha-secret-key" value="' . esc_attr( $value ) . '" />';
+		$value = get_option( 'wp-forms-recaptcha-secret-key', '' );
+		echo '<input type="text" id="wp-forms-recaptcha-secret-key" name="wp-forms-recaptcha-secret-key" value="' . esc_attr( $value ) . '" />';
 	}
 
 }
 
 // Initialize the plugin
-$personalize_login_pages_plugin = new Personalize_Login_Plugin();
+$wp_forms = new WP_Forms();
 
 // Create the custom pages at plugin activation
-register_activation_hook( __FILE__, array( 'Personalize_Login_Plugin', 'plugin_activated' ) );
+register_activation_hook( __FILE__, array( 'WP_Forms', 'plugin_activated' ) );
